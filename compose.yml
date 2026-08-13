@@ -1,0 +1,32 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile.app
+        ports:
+            - '8080:80'
+        networks:
+            default:
+                aliases:
+                    - app.test
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -q --spider http://localhost/ || exit 1']
+            interval: 2s
+            timeout: 2s
+            retries: 15
+
+    tests:
+        build:
+            context: .
+            dockerfile: Dockerfile.tests
+        depends_on:
+            app:
+                condition: service_healthy
+        environment:
+            WDIO_BASE_URL: http://app.test
+            CI: ${CI:-}
+        # Surface the in-container Allure report on the host. allure-results stays
+        # inside the (--rm) container so runs never merge stale results.
+        volumes:
+            - ./allure-report:/app/allure-report
+        profiles: ['test']

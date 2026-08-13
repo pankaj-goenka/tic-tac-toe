@@ -1,0 +1,18 @@
+{
+    // TypeScript is used only for type-checking here; tsx / WDIO run the sources directly.
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+
+        "strict": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+
+        // Ambient types for `browser`, `$`, `expect`, `describe`, `it`, …
+        "types": ["node", "@wdio/globals/types", "expect-webdriverio", "@wdio/mocha-framework"]
+    },
+    "include": ["wdio.conf.ts", "src/**/*.ts"]
+}
