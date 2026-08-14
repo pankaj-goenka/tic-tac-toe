@@ -8,10 +8,17 @@ import { header } from '../pages/sections/header.section';
 import { getStorage, registerAndStart, resetState, userKeys } from '../helpers/browser.helper';
 import { escapeForRegex, playLosingGame, playToEnd, playWinningGame } from '../helpers/util.helper';
 
-describe('End-to-end flows', () => {
+describe('End-to-end user journeys', () => {
     beforeEach(resetState);
 
-    it('registers, wins on Easy, loses on Medium, reviews history, logs out [E2E-01]', async () => {
+    // Sign out, wait for the auth card, and confirm we're back on it.
+    const logOutToAuthCard = async () => {
+        await navBar.signOut();
+        await login.waitReady();
+        verify.equals(await login.isShowing(), true);
+    };
+
+    it('registers, wins on Easy, loses on Medium, reviews history, logs out [TEST-13]', async () => {
         const name = await registerAndStart();
 
         await playWinningGame('easy');
@@ -24,26 +31,22 @@ describe('End-to-end flows', () => {
         await history.open();
         verify.equals(await history.countRows(), 2);
 
-        const newest = await history.readRow(0);
-        const older = await history.readRow(1);
+        const [newest, older] = [await history.readRow(0), await history.readRow(1)];
         verify.matches(newest.result, /loss/i);
         verify.matches(newest.difficulty, /medium/i);
         verify.matches(older.result, /win/i);
         verify.matches(older.difficulty, /easy/i);
 
         await profile.open();
-        const stats = await profile.readStats();
-        verify.deepEquals(stats, { wins: 1, losses: 1, draws: 0 });
+        verify.deepEquals(await profile.readStats(), { wins: 1, losses: 1, draws: 0 });
         await verify.value(profile.nameField, name);
 
-        await navBar.signOut();
-        await login.waitReady();
-        verify.equals(await login.isShowing(), true);
+        await logOutToAuthCard();
         verify.isNull(await getStorage<string>('session'));
         verify.includes(await userKeys(), name.toLowerCase());
     });
 
-    it('persists preferences and account across a logout [E2E-02]', async () => {
+    it('persists preferences and account across a logout [TEST-14]', async () => {
         const name = await registerAndStart();
 
         await header.switchTheme();
@@ -67,7 +70,7 @@ describe('End-to-end flows', () => {
         verify.equals(await history.countRows(), 1);
 
         await profile.open();
-        const stats = await profile.readStats();
-        verify.equals(stats.wins + stats.losses + stats.draws, 1);
+        const { wins, losses, draws } = await profile.readStats();
+        verify.equals(wins + losses + draws, 1);
     });
 });

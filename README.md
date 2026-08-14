@@ -6,6 +6,17 @@ I picked **WebdriverIO + TypeScript** as the automation stack, with **Mocha** as
 
 ---
 
+## Documentation
+
+The QA workflow behind the automation lives in [`docs/`](docs/):
+
+1. **[EXPLORATION.md](docs/EXPLORATION.md)** — black-box exploratory notes: features, flows, and the bugs I found.
+2. **[TESTPLAN.md](docs/TESTPLAN.md)** — scope, risk-based priorities, and coverage.
+3. **[TEST-CASES.md](docs/TEST-CASES.md)** — concrete cases, each mapped to its `TEST-*` id in the specs.
+4. **[DECISIONS.md](docs/DECISIONS.md)** — short design rationale (optional).
+
+---
+
 ## Repository layout
 
 The folder naming is deliberate: `app/` is the thing under test, `src/` is the test framework I wrote.
@@ -19,6 +30,7 @@ The folder naming is deliberate: `app/` is the thing under test, `src/` is the t
 │   │   └── sections/
 │   ├── helpers/            # dom / assertions / browser / util / injectionData
 │   └── specs/              # WebdriverIO + Mocha specs
+├── docs/                   # Exploration, test plan, test cases, design notes
 ├── Dockerfile.app          # nginx image serving app/ on port 8080
 ├── Dockerfile.tests        # Node 22 + Chromium + chromedriver + WDIO
 ├── compose.yml             # Docker Compose services: app and tests
@@ -26,7 +38,7 @@ The folder naming is deliberate: `app/` is the thing under test, `src/` is the t
 └── tsconfig.json           # TypeScript configuration; noEmit
 ```
 
-Every automated spec keeps its `TC-*` id in the `it` title (e.g. `... [TC-REG-01]`), so coverage stays traceable.
+Every automated spec keeps its `TEST-*` id in the `it` title (e.g. `... [TEST-09]`), so coverage stays traceable.
 
 ---
 

@@ -6,37 +6,44 @@ import { history } from '../pages/history.page';
 import { navBar } from '../pages/sections/navBar.section';
 import { getStorage, registerAndStart, resetState, userKeys } from '../helpers/browser.helper';
 
-describe('Navigation', () => {
+describe('Navigation between views', () => {
     beforeEach(async () => {
         await resetState();
         await registerAndStart();
     });
 
-    it('shows the nav bar with all entries after login [TC-NAV-01]', async () => {
+    // Each entry: open the tab, wait for its view, assert that view is showing.
+    const routes = [
+        { open: () => navBar.openProfile(), page: profile },
+        { open: () => navBar.openHistory(), page: history },
+        { open: () => navBar.openPlay(), page: game },
+    ] as const;
+
+    it('shows the nav bar with all entries after login [TEST-39]', async () => {
         verify.equals(await navBar.isShown(), true);
-        await verify.visible(navBar.playTab);
-        await verify.visible(navBar.profileTab);
-        await verify.visible(navBar.historyTab);
-        await verify.visible(navBar.signOutButton);
-        await verify.visible(navBar.userGreeting);
-        await verify.visible(navBar.avatar);
+
+        const chrome = [
+            navBar.playTab,
+            navBar.profileTab,
+            navBar.historyTab,
+            navBar.signOutButton,
+            navBar.userGreeting,
+            navBar.avatar,
+        ];
+        for (const el of chrome) {
+            await verify.visible(el);
+        }
     });
 
-    it('switches view and updates active state per nav item [TC-NAV-02]', async () => {
-        await navBar.openProfile();
-        await profile.waitReady();
-        verify.equals(await profile.isShowing(), true);
-
-        await navBar.openHistory();
-        await history.waitReady();
-        verify.equals(await history.isShowing(), true);
-
-        await navBar.openPlay();
-        await game.waitReady();
-        verify.equals(await game.isShowing(), true);
+    it('switches view and updates active state per nav item [TEST-40]', async () => {
+        for (const { open, page } of routes) {
+            await open();
+            await page.waitReady();
+            verify.equals(await page.isShowing(), true);
+        }
     });
 
-    it('clears session and returns to the auth card on log out [TC-NAV-03]', async () => {
+    it('clears session and returns to the auth card on log out [TEST-41]', async () => {
         await navBar.signOut();
         await login.waitReady();
         verify.equals(await login.isShowing(), true);

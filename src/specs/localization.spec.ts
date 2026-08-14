@@ -1,21 +1,24 @@
 import { verify } from '../helpers/assertions.helper';
-import { login } from '../pages/login.page';
 import { header } from '../pages/sections/header.section';
+import { login } from '../pages/login.page';
 import { resetState } from '../helpers/browser.helper';
 
-describe('Localization', () => {
+describe('Localization (language / RTL)', () => {
     beforeEach(resetState);
 
-    it('translates labels and switches document direction to RTL [TC-I18N-01]', async () => {
+    const readSubmitLabel = () => login.submitBtn.getText();
+
+    it('translates labels and switches document direction to RTL [TEST-38]', async () => {
         await login.waitReady();
-        const submitEn = await login.submitBtn.getText();
+        const submitEn = await readSubmitLabel();
 
         await header.chooseLanguage('fa');
 
-        verify.equals(await header.readDocLang(), 'fa');
-        verify.equals(await header.readDocDir(), 'rtl');
+        const [docLang, docDir] = await Promise.all([header.readDocLang(), header.readDocDir()]);
+        verify.equals(docLang, 'fa');
+        verify.equals(docDir, 'rtl');
 
-        const submitFa = await login.submitBtn.getText();
+        const submitFa = await readSubmitLabel();
         verify.notEquals(submitFa, submitEn);
         verify.greaterThan(submitFa.trim().length, 0);
     });
